@@ -1,0 +1,22 @@
+
+
+version: '2'
+
+services:
+  postgresql:
+    image: postgres:15.6
+    ports:
+      - '5432:5432'
+    volumes:
+      - 'psql_data:/var/lib/postgresql/data'
+      - './init_db:/docker-entrypoint-initdb.d/'
+
+    environment:
+      - 'ALLOW_EMPTY_PASSWORD=yes'
+      - 'POSTGRES_HOST_AUTH_METHOD=trust'
+    container_name: psql
+
+
+volumes:
+  psql_data:
+    driver: local

@@ -1,0 +1,53 @@
+# Посмотреть список правил можно здесь
+# https://flakes.orsinium.dev/ и здесь
+# https://docs.astral.sh/ruff/rules/
+
+line-length = 120 # Set the maximum line length to 120.
+extend-exclude = [
+    "core/grpc/generated/*.py",
+    "scripts",
+    ]
+
+[lint]
+
+ignore = [
+    # shadowing
+    "A003",
+    # Docstring
+    "D100","D101","D102","D103","D104","D105","D106","D107", "D209",
+    # isort config not found
+    "I002",
+    # Lowercase imported in upercase
+    "N812",
+    # Assert detected
+    "S101",
+    # Security warnings
+    "S303","S311",
+    # Lambda-assignment
+    "E731",
+    ]
+[lint.per-file-ignores]
+    # Unused imports in init files
+    "__init__.py" = ["F401"]
+    # mixedCase
+    "app_toml.py" = ["N815", "A003"]
+    "manifest.py" = ["N815", "A003"]
+    "help_messages.py" = ["C901"]
+    "message.py" = ["C901"]
+
+[lint.mccabe]
+max-complexity = 10
+
+[lint.flake8-quotes]
+avoid-escape = false
+inline-quotes = 'single'
+
+[lint.isort]
+split-on-trailing-comma = false
+
+[format]
+skip-magic-trailing-comma = true
+quote-style = "preserve"
+indent-style = "space"
+line-ending = "auto"
+preview = true
