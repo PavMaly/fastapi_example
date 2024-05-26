@@ -1,10 +1,10 @@
 
-from fastapi import APIRouter, status, HTTPException, Depends
+from fastapi import APIRouter, status, HTTPException
 
-from app.common.common import CommonDeps, GetToken, oauth2_scheme
+from app.common.common import CommonDeps, GetToken
 from app.repositories.book import get_books, get_book_by_id, add_new_book, search_book_repo, book_id_exists, update_book
 from app.api.schemas.book import BookCreate, BookResponse, BookSearchResponse, BookUpdate
-from app.repositories.user import check_is_worker
+from app.repositories.user import check_is_staff
 
 books_route = APIRouter()
 
@@ -24,7 +24,7 @@ async def search_book(commons: CommonDeps, book_title: str = '', author: str = '
 @books_route.post('/add', status_code=status.HTTP_201_CREATED)
 async def add_book(book: BookCreate, token: str = GetToken) -> BookResponse:
     """Add a new book in library collection and return its data presentation."""
-    await check_is_worker(token)
+    await check_is_staff(token)
     return await add_new_book(book)
 
 
@@ -37,7 +37,8 @@ async def get_book(book_id: int) -> BookResponse:
 
 
 @books_route.put('/update_book')
-async def update_book_info(book: BookUpdate):
+async def update_book_info(book: BookUpdate, token: str = GetToken):
+    """Update existing book info."""
+    await check_is_staff(token)
     await book_id_exists(book.id)
-
     await update_book(book)

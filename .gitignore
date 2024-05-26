@@ -61,17 +61,17 @@ test_results/
 *.mo
 *.pot
 
-# Django stuff:
+# Django staff:
 *.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
-# Flask stuff:
+# Flask staff:
 instance/
 .webassets-cache
 
-# Scrapy stuff:
+# Scrapy staff:
 .scrapy
 
 # Sphinx documentation
@@ -103,7 +103,7 @@ ipython_config.py
 # PEP 582; used by e.g. github.com/David-OConnor/pyflow
 __pypackages__/
 
-# Celery stuff
+# Celery staff
 celerybeat-schedule
 celerybeat.pid
 

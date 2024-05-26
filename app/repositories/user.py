@@ -1,9 +1,9 @@
 import hashlib
 
-from fastapi import HTTPException, Depends
+from fastapi import HTTPException
 
 from app.api.schemas.user import LoginUser, BaseUser, UserCreate, CreateUserResponse
-from app.common.common import oauth2_scheme, get_user_from_token
+from app.common.common import get_user_from_token
 from app.common.logger import log
 from app.db.database import database, SALT
 from app.db.db_executor import db_executor
@@ -108,12 +108,12 @@ async def _is_worker(username: str) -> bool:
 
 
 @log
-async def user_is_worker(token):
+async def user_is_staff_member(token):
     user = await get_user_from_token(token)
     return await _is_worker(user)
 
 
 @log
-async def check_is_worker(token):
-    if not await user_is_worker(token):
+async def check_is_staff(token):
+    if not await user_is_staff_member(token):
         raise HTTPException(status_code=403, detail='Only privileged users allowed')

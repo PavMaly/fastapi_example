@@ -1,9 +1,9 @@
 from collections import namedtuple
+from datetime import datetime
 
-from fastapi import HTTPException, Depends
+from fastapi import HTTPException
 
 from app.api.schemas.authority import Authority, ID_NO_AUTHOR
-from app.common.common import GetToken
 from app.common.logger import log
 from app.db.db_executor import db_executor
 from app.repositories.author import new_book_authors
@@ -14,7 +14,7 @@ from app.repositories.authority import create_authority, delete_authority_by_boo
 
 @log
 async def get_books(skip: int, limit: int) -> list[BookResponse]:
-    query = 'SELECT books.book_id, title, publisher, year, STRING_AGG(author, \', \') as authors FROM books ' \
+    query = 'SELECT books.book_id, title, publisher, year, STRING_AGG(author, \', \') as authors, status FROM books ' \
             'JOIN authority ON books.book_id = authority.book_id ' \
             'JOIN authors ON authority.author_id = authors.author_id ' \
             'GROUP BY books.book_id ORDER BY books.book_id ' \
@@ -27,7 +27,7 @@ async def get_books(skip: int, limit: int) -> list[BookResponse]:
 
 @log
 async def get_book_by_id(book_id: int) -> BookResponse:
-    query = 'SELECT books.book_id, title, publisher, year, STRING_AGG(author, \', \') as authors FROM books ' \
+    query = 'SELECT books.book_id, title, publisher, year, STRING_AGG(author, \', \') as authors, status FROM books ' \
             'JOIN authority ON books.book_id = authority.book_id ' \
             'JOIN authors ON authority.author_id = authors.author_id ' \
             'WHERE books.book_id = :book_id ' \
@@ -50,17 +50,6 @@ async def book_id_exists(book_id: int) -> bool:
 
 
 @log
-async def is_dublicate_book(book: BookCreate) -> int:
-    query = 'SELECT book_id from books ' \
-            'WHERE title = :title and publisher = :publisher and year = :year'
-    values = {'title': book.title, 'publisher': book.publisher, 'year': book.year}
-    result = await db_executor.fetch_one(query, values)
-    if result:
-        return result['book_id']
-    return 0
-
-
-@log
 async def create_book(book: BookCreate) -> int:
     query = 'INSERT INTO books (title, publisher, year) ' \
             'VALUES (:title, :publisher, :year) ' \
@@ -73,10 +62,6 @@ async def create_book(book: BookCreate) -> int:
 @log
 async def add_new_book(book: BookCreate) -> BookResponse:
     # https://www.encode.io/databases/connections_and_transactions/
-    dublicate = await is_dublicate_book(book)
-    if dublicate:
-        dublicate_info = book.model_dump(exclude={'authors', 'no_authority'})
-        raise HTTPException(status_code=409, detail=f'Book <{dublicate_info}> already exists. ID: {dublicate}.')
     async with database.transaction():
         book_authors_id = await new_book_authors(book.authors)
         new_book_id = await create_book(book)
@@ -117,13 +102,6 @@ async def search_book_repo(title: str, author: str, skip: int, limit: int) -> Bo
     raise HTTPException(status_code=404, detail='No books found.')
 
 
-@log
-async def _update_book_title(book_id: int, title: str):
-    query = ' UPDATE books SET title = :title WHERE book_id = :id ;'
-    values = {'title': title, 'id': book_id}
-    await db_executor.execute(query, values)
-
-
 BookValue = namedtuple('BookValue', ['value_name', 'value_rate'])
 
 
@@ -144,7 +122,7 @@ async def update_book(book: BookUpdate):
             book_new_publisher = BookValue('publisher', book.publisher)
             await _update_book_value(book.id, book_new_publisher)
         if book.year:
-            book_new_year = BookValue('year')
+            book_new_year = BookValue('year', book.year)
             await _update_book_value(book.id, book_new_year)
         if book.authors:
             book_authors_id = await new_book_authors(book.authors)
@@ -156,6 +134,8 @@ async def update_book(book: BookUpdate):
             await delete_authority_by_book_id(book.id)
             no_author_authority = Authority(book_id=book.id, author_id=ID_NO_AUTHOR)
             await create_authority(no_author_authority)
+        book_new_updated_at = BookValue('updated_at', datetime.now())
+        await _update_book_value(book.id, book_new_updated_at)
 
 
 

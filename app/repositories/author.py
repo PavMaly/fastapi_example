@@ -27,11 +27,11 @@ async def create_author(author: Author) -> int:
 async def new_book_authors(authors: list[Author]) -> list[int]:
     book_authors_id = []
     for author in authors:
-        author_id = await find_author(author)
-        if not author_id:
+        author_exists = await find_author(author)
+        if not author_exists:
             new_author = await create_author(author)
             book_authors_id.append(new_author)
-        if author_id:
-            book_authors_id.append(author_id)
+        if author_exists:
+            book_authors_id.append(author_exists.author_id)
     return book_authors_id
 

@@ -6,6 +6,9 @@ from app.api.schemas.author import Author
 from app.common.base_data_classes import StrippedString
 
 
+BOOK_STATUSES = ['in collection', 'on hands', 'on hold']
+
+
 class BookCreate(BaseModel):
     title: StrippedString
     publisher: StrippedString
@@ -38,6 +41,7 @@ class BookResponse(BaseModel):
     publisher: str
     year: int
     authors: str
+    status: str
 
 
 class BookSearchMeta(BaseModel):

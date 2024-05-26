@@ -3,67 +3,79 @@
 psql --set ON_ERROR_STOP=OFF -h localhost -U "app" -d "app"<<-EOSQL
 -- Книги
   CREATE TABLE IF NOT EXISTS books(
-    book_id SERIAL PRIMARY KEY,
+    book_id INT generated always as identity (start 100001) PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     publisher VARCHAR(255) NOT NULL,
     year INT NOT NULL,
-    CONSTRAINT
-    unique_book UNIQUE (title, publisher, year));
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(50) DEFAULT 'in collection'
+    );
 
   DELETE FROM books;
-  ALTER SEQUENCE  books_book_id_seq  RESTART WITH 1;
+  ALTER SEQUENCE  books_book_id_seq  RESTART WITH 100001;
 
   INSERT INTO books (title, publisher, year) values
-  -- 1
+  -- 100001
   ('Программирование cloud native', 'Издательские решения', 2020),
-  -- 2
+  -- 100002
   ('Изучаем python', 'Питер', 2022),
-  -- 3
+  -- 100003
   ('Океан в конце дороги', 'АСТ', 2022),
-  -- 4
+  -- 100004
   ('Благие знамения', 'Эксмо', 2023),
-  -- 5
+  -- 100005
   ('Чапаев и Пустота', 'АСТ', 2023),
-  -- 6
+  -- 100006
   ('Generation П', 'Азбука', '2022'),
-  -- 7
+  -- 100007
   ('Детство', 'Эксмо', 2019),
-  -- 8
+  -- 100008
   ('В людях', 'Эксмо', 2020),
-  -- 9
+  -- 100009
   ('Мои университеты', 'Эксмо', 2021),
-  -- 10
+  -- 100010
   ('Правила устройства электроустановок. Все действующие разделы ПУЭ-6 и ПУЭ-7', 'Норматика', 2020),
-  -- 11
+  -- 100011
   ('СП 52.13330.2016. Свод правил. Естественное и искусственное освещение (Актуализированная редакция СНиП 23-05-95*)', 'УралЮрИздат', 2021),
-  -- 12
+  -- 100012
   ('Статистика и котики', 'АСТ', 2022),
-  -- 13
+  -- 100013
   ('Скандинавские боги', 'АСТ', 2019),
-  -- 14
+  -- 100014
   ('Американские боги', 'АСТ', 2018),
-  -- 15
+  -- 100015
   ('Для программистов. Assembler для DOS, Windows и Unix', 'ДМК Пресс', 2017),
-  -- 16
+  -- 100016
   ('Высоконагруженные приложения. Программирование, масштабирование, поддержка', 'Sprint Book', 2024),
-  -- 17
+  -- 100017
   ('Бесцветный Цкуру Тадзаки и годы его странствий', 'Эксмо', 2023),
-  -- 18
+  -- 100018
   ('Кафка на пляже', 'Эксмо', 2017),
-  -- 19
+  -- 100019
   ('Отказ всех систем', 'Fanzon', 2020),
-  -- 20
+  -- 100020
   ('Стратегия отхода', 'Fanzon', 2020),
-  -- 21
+  -- 100021
   ('Сетевой эффект', 'Fanzon', 2020),
-  -- 22
+  -- 100022
   ('Телеметрия беглецов', 'Fanzon', 2020),
-  -- 23
+  -- 100023
   ('Жизнь насекомых', 'АСТ', 2019),
-  -- 24
+  -- 100024
   ('Жизнь насекомых', 'Азбука', 2023),
-  -- 25
-  ('Мистер Мерседес', 'АСТ', 2017);
+  -- 100025
+  ('Мистер Мерседес', 'АСТ', 2017),
+  -- 100026
+  ('Детство', 'Эксмо', 2019),
+  -- 100027
+  ('The Bazaar of Bad Dreams: Stories', 'Scribner', 2015),
+  -- 100028
+  ('Soft Power: The Means To Success In World Politics', 'PublicAffairs', 2004),
+  -- 100029
+  ('Thinking, Fast and Slow', 'Farrar, Straus and Giroux', 2011),
+  -- 100030
+  ('Thinking, Fast and Slow', 'Farrar, Straus and Giroux', 2013);
 
 -- Авторы
   CREATE TABLE IF NOT EXISTS authors(
@@ -75,7 +87,7 @@ psql --set ON_ERROR_STOP=OFF -h localhost -U "app" -d "app"<<-EOSQL
 
   INSERT INTO authors (author) values
   -- 1
-  ('Нет авторcтва'),
+  ('No authority'),
   -- 2
   ('Портянкин Иван'),
   -- 3
@@ -99,7 +111,13 @@ psql --set ON_ERROR_STOP=OFF -h localhost -U "app" -d "app"<<-EOSQL
   -- 12
   ('Уэллс Марта'),
   -- 13
-  ('Кинг Стивен');
+  ('Кинг Стивен'),
+  -- 14
+  ('King Stephen'),
+  -- 15
+  ('Joseph S. Nye Jr.'),
+  -- 16
+  ('Daniel Kahneman');
 
 --Авторство
   CREATE TABLE IF NOT EXISTS authority(
@@ -115,32 +133,37 @@ psql --set ON_ERROR_STOP=OFF -h localhost -U "app" -d "app"<<-EOSQL
   ALTER SEQUENCE authority_id_seq RESTART WITH 1;
 
   INSERT INTO authority (book_id, author_id) values
-  (1, 2),
-  (2, 3),
-  (3, 4),
-  (4, 4),
-  (4, 5),
-  (5, 6),
-  (6, 6),
-  (7, 7),
-  (8, 7),
-  (9, 7),
-  (10, 1),
-  (11, 1),
-  (12, 8),
-  (13, 4),
-  (14, 4),
-  (15, 9),
-  (16, 10),
-  (17, 11),
-  (18, 11),
-  (19, 12),
-  (20, 12),
-  (21, 12),
-  (22, 12),
-  (23, 6),
-  (24, 6),
-  (25, 13);
+  (100001, 2),
+  (100002, 3),
+  (100003, 4),
+  (100004, 4),
+  (100004, 5),
+  (100005, 6),
+  (100006, 6),
+  (100007, 7),
+  (100008, 7),
+  (100009, 7),
+  (100010, 1),
+  (100011, 1),
+  (100012, 8),
+  (100013, 4),
+  (100014, 4),
+  (100015, 9),
+  (100016, 10),
+  (100017, 11),
+  (100018, 11),
+  (100019, 12),
+  (100020, 12),
+  (100021, 12),
+  (100022, 12),
+  (100023, 6),
+  (100024, 6),
+  (100025, 13),
+  (100026, 7),
+  (100027, 14),
+  (100028, 15),
+  (100029, 16),
+  (100030, 16);
 
 
 EOSQL
